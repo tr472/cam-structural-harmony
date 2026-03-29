@@ -28,6 +28,7 @@ BIDS dataset
                       └── variance decomposition
                            └── QC report (AI-assisted)
 ```
+![alt text](https://github.com/tr472/cam-structural-harmony/blob/main/cam_structural_harmony_pipeline.svg)
 
 For each combination of skull-stripping method and normalisation technique, the
 pipeline runs the full FreeSurfer → harmonisation → evaluation sequence. This
@@ -37,7 +38,9 @@ scanner-related variance.
 Variance sources decomposed: inter-scanner, intra-scanner, site, manufacturer,
 scanner model, and study/protocol effects.
 
-See [cam-dwi-harmony](#) for the companion diffusion MRI harmonisation pipeline.
+[cam-dwi-harmony](#) is coming soon. But below is the companion diffusion MRI harmonisation pipeline.
+
+![alt text](https://github.com/tr472/cam-structural-harmony/blob/main/dwi_pipeline_multistage_v2.svg)
 
 ## Installation
 ```bash
