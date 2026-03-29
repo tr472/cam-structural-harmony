@@ -1,0 +1,29 @@
+skull_strip:
+  methods: [synthstrip, robex]
+  synthstrip:
+    no_csf: false          # exclude CSF from brain mask
+    device: cpu            # cpu or cuda
+  robex:
+    seed: 42
+
+intensity_norm:
+  methods: [zscore, fcm_wm, kde, whitestripe, nyul, minmax]
+
+freesurfer:
+  parallel_jobs: 4
+  subjects_dir: null       # null → output_dir/freesurfer
+  # Workflow: autorecon1 -noskullstrip → copy brainmask → autorecon2 -careg -autorecon3
+
+combat:
+  batch_col: scanner
+  biological_covariates: [age, sex, tiv]
+  parametric: true
+
+variance:
+  sources: [scanner, site, manufacturer, model, protocol]
+  icc_threshold: 0.75      # flag ROIs below this value
+  rois: null               # null → all available aparc/aseg ROIs
+
+paths:
+  freesurfer_home: null    # null → falls back to $FREESURFER_HOME
+  synthstrip_bin: mri_synthstrip   # FreeSurfer 7.x binary name

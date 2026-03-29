@@ -1,0 +1,23 @@
+Metadata-Version: 2.2
+Name: cam-structural-harmony
+Version: 0.1.0
+Summary: Modular pipeline for evaluating and harmonising structural MRI data across scanners
+Author: Cambridge Ageing and Neuroscience (Cam-CAN) PhD Project
+Requires-Python: >=3.9
+Requires-Dist: nibabel>=4.0
+Requires-Dist: numpy>=1.24
+Requires-Dist: scipy>=1.10
+Requires-Dist: pandas>=2.0
+Requires-Dist: scikit-learn>=1.3
+Requires-Dist: matplotlib>=3.7
+Requires-Dist: seaborn>=0.12
+Requires-Dist: neuroCombat-sklearn>=0.1
+Requires-Dist: intensity-normalization>=3.0
+Requires-Dist: anthropic>=0.30
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: SimpleITK>=2.3
+Requires-Dist: pingouin>=0.5
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

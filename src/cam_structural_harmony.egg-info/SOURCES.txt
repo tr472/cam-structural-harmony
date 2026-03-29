@@ -1,0 +1,17 @@
+README.md
+setup.py
+src/cam_harmony/__init__.py
+src/cam_harmony/freesurfer.py
+src/cam_harmony/harmonise.py
+src/cam_harmony/intensity_norm.py
+src/cam_harmony/plotting.py
+src/cam_harmony/qc_assistant.py
+src/cam_harmony/run.py
+src/cam_harmony/skull_strip.py
+src/cam_harmony/variance.py
+src/cam_structural_harmony.egg-info/PKG-INFO
+src/cam_structural_harmony.egg-info/SOURCES.txt
+src/cam_structural_harmony.egg-info/dependency_links.txt
+src/cam_structural_harmony.egg-info/entry_points.txt
+src/cam_structural_harmony.egg-info/requires.txt
+src/cam_structural_harmony.egg-info/top_level.txt
