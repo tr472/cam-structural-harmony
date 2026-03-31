@@ -28,7 +28,10 @@ BIDS dataset
                       └── variance decomposition
                            └── QC report (AI-assisted)
 ```
+<<<<<<< HEAD
 ![alt text](https://github.com/tr472/cam-structural-harmony/blob/main/cam_structural_harmony_pipeline.svg)
+=======
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
 For each combination of skull-stripping method and normalisation technique, the
 pipeline runs the full FreeSurfer → harmonisation → evaluation sequence. This
@@ -38,9 +41,13 @@ scanner-related variance.
 Variance sources decomposed: inter-scanner, intra-scanner, site, manufacturer,
 scanner model, and study/protocol effects.
 
+<<<<<<< HEAD
 [cam-dwi-harmony](#) is coming soon. But below is the companion diffusion MRI harmonisation pipeline.
 
 ![alt text](https://github.com/tr472/cam-structural-harmony/blob/main/dwi_pipeline_multistage_v2.svg)
+=======
+See [cam-dwi-harmony](#) for the companion diffusion MRI harmonisation pipeline.
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
 ## Installation
 ```bash
@@ -66,6 +73,11 @@ python -m cam_harmony.qc_assistant \
   --focus_rois hippocampus lateral_ventricle entorhinal
 ```
 
+<<<<<<< HEAD
+=======
+To explore the full pipeline interactively without real MRI data or a FreeSurfer installation, open `notebooks/demo.ipynb` — it runs end-to-end on synthetic data and produces all key figures.
+
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 ## Configuration
 ```yaml
 skull_strip:

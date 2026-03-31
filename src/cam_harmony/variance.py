@@ -332,7 +332,11 @@ def decompose_variance(
     for roi in roi_cols:
         total_var = data[roi].var()
         if total_var == 0:
+<<<<<<< HEAD
             results.append({s: 0.0 for s in sources} | {"residual": 0.0, "roi": roi})
+=======
+            results.append({s: 0.0 for s in sources} | {"residual (biological+noise)": 0.0, "roi": roi})
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
             continue
 
         explained = {}
@@ -340,13 +344,24 @@ def decompose_variance(
 
         for source in sources:
             group_means = data.groupby(source)[roi].transform("mean")
+<<<<<<< HEAD
             ss_source = ((group_means - data[roi].mean()) ** 2).sum()
             explained[source] = ss_source / (total_var * len(data)) * 100
+=======
+            current_mean = residual_data.mean()
+            ss_source = ((group_means - current_mean) ** 2).sum()
+            explained[source] = ss_source / (total_var * len(data)) * 100
+            residual_data = residual_data - (group_means - current_mean)
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
         total_explained = sum(explained.values())
         residual_pct = max(0.0, 100.0 - total_explained)
 
+<<<<<<< HEAD
         results.append({**explained, "residual": residual_pct, "roi": roi})
+=======
+        results.append({**explained, "residual (biological+noise)": residual_pct, "roi": roi})
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
     df = pd.DataFrame(results).set_index("roi")
     return df
@@ -444,6 +459,92 @@ def run_variance_analysis(
     return results
 
 
+<<<<<<< HEAD
+=======
+def compute_variance_components(
+    data: pd.DataFrame,
+    roi_cols: list[str],
+    subject_col: str,
+    scanner_col: str,
+) -> pd.DataFrame:
+    """
+    Decompose ROI variance into between-subject, between-scanner, and
+    within-scanner (test-retest) components.
+
+    Requires at least 2 rows per (subject, scanner) pair (i.e. session repeats).
+    Components are computed directly from group statistics — not sequential ANOVA —
+    so they are non-overlapping and sum to 100%.
+
+    Returns
+    -------
+    pd.DataFrame with ROIs as index and columns:
+        between_subject, between_scanner, within_scanner (all % of total).
+    """
+    results = []
+    for roi in roi_cols:
+        subj_means = data.groupby(subject_col)[roi].mean()
+        subj_scan_means = data.groupby([subject_col, scanner_col])[roi].mean()
+
+        var_bw_subj = float(subj_means.var())
+
+        subj_mean_expanded = subj_scan_means.groupby(level=0).transform("mean")
+        scanner_devs = subj_scan_means - subj_mean_expanded
+        var_bw_scan = float((scanner_devs ** 2).mean())
+
+        var_within = float(data.groupby([subject_col, scanner_col])[roi].var().mean())
+
+        total = var_bw_subj + var_bw_scan + var_within
+        if total == 0:
+            results.append({"roi": roi, "between_subject": 0.0,
+                             "between_scanner": 0.0, "within_scanner": 0.0})
+        else:
+            results.append({
+                "roi": roi,
+                "between_subject": round(var_bw_subj / total * 100, 1),
+                "between_scanner": round(var_bw_scan / total * 100, 1),
+                "within_scanner":  round(var_within  / total * 100, 1),
+            })
+    return pd.DataFrame(results).set_index("roi")
+
+
+def detect_design(
+    data: pd.DataFrame,
+    subject_col: str,
+    scanner_col: str,
+    manufacturer_col: str | None = None,
+    session_col: str | None = None,
+) -> dict:
+    """
+    Inspect a DataFrame and return design flags for conditional figure selection.
+
+    Returns
+    -------
+    dict with keys:
+        n_scanners      : int  — number of unique scanners
+        n_manufacturers : int  — number of unique manufacturers (1 if col absent)
+        is_paired       : bool — every subject appears on every scanner
+        has_sessions    : bool — any (subject, scanner) pair has >1 row
+    """
+    n_scanners = data[scanner_col].nunique()
+    n_manufacturers = (
+        data[manufacturer_col].nunique()
+        if manufacturer_col and manufacturer_col in data.columns else 1
+    )
+    subjects_per_scanner = data.groupby(scanner_col)[subject_col].nunique()
+    is_paired = bool((subjects_per_scanner == data[subject_col].nunique()).all())
+    if session_col and session_col in data.columns:
+        has_sessions = data[session_col].nunique() > 1
+    else:
+        has_sessions = bool(data.groupby([subject_col, scanner_col]).size().max() > 1)
+    return {
+        "n_scanners": n_scanners,
+        "n_manufacturers": n_manufacturers,
+        "is_paired": is_paired,
+        "has_sessions": has_sessions,
+    }
+
+
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 if __name__ == "__main__":
     import argparse
 

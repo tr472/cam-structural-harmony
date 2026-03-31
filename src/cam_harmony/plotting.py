@@ -140,7 +140,11 @@ def plot_variance_decomposition(
     top_n : int
         Show only the top N ROIs by technical (non-residual) variance.
     """
+<<<<<<< HEAD
     technical_cols = [c for c in vd_df.columns if c != "residual"]
+=======
+    technical_cols = [c for c in vd_df.columns if not c.startswith("residual")]
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
     technical_total = vd_df[technical_cols].sum(axis=1)
     top_rois = technical_total.nlargest(top_n).index
     df_plot = vd_df.loc[top_rois]
@@ -477,6 +481,11 @@ def plot_icc_pre_post(
     threshold: float = 0.75,
     top_n: int = 20,
     title: str = "ICC before and after NeuroCombat harmonisation",
+<<<<<<< HEAD
+=======
+    label_pre: str = "Pre-harmonisation",
+    label_post: str = "Post-harmonisation",
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 ) -> None:
     """
     Side-by-side bar chart comparing per-ROI ICC before and after harmonisation.
@@ -513,9 +522,15 @@ def plot_icc_pre_post(
     width = 0.38
 
     fig, ax = plt.subplots(figsize=(12, 6))
+<<<<<<< HEAD
     ax.bar(x - width / 2, df_plot["Pre"],  width, label="Pre-harmonisation",
            color="steelblue",  alpha=0.85)
     ax.bar(x + width / 2, df_plot["Post"], width, label="Post-harmonisation",
+=======
+    ax.bar(x - width / 2, df_plot["Pre"],  width, label=label_pre,
+           color="steelblue",  alpha=0.85)
+    ax.bar(x + width / 2, df_plot["Post"], width, label=label_post,
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
            color="darkorange", alpha=0.85)
     ax.axhline(threshold, color="crimson", linestyle="--", linewidth=1.2,
                label=f"Threshold ({threshold})")
@@ -694,6 +709,224 @@ def generate_all_figures(
     return saved
 
 
+<<<<<<< HEAD
+=======
+# ── Normalized scanner agreement scatter ─────────────────────────────────────
+
+def plot_normalized_scanner_agreement(
+    data: pd.DataFrame,
+    roi_cols: list,
+    scanner_col: str,
+    scanners: tuple,
+    subject_col: str,
+    output_path: Path,
+    title: str | None = None,
+) -> None:
+    """
+    Plot normalized ROI volumes for scanner A vs scanner B across all ROIs.
+
+    Each point is one (subject, ROI) pair.  Volumes are normalized by each
+    scanner's ROI mean so all ROIs share a common scale (~1.0 = mean) and
+    can be overlaid regardless of absolute magnitude.  Points are coloured
+    by subject to show that biological ordering is preserved across scanners.
+    A y = x identity line marks perfect inter-scanner agreement.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        One row per (subject, scanner) — typically roi_df_avg.
+    roi_cols : list of str
+    scanner_col : str
+    scanners : tuple of str
+        (scanner_A, scanner_B) — defines x and y axes.
+    subject_col : str
+    output_path : Path
+    title : str, optional
+    """
+    sc_a, sc_b = scanners
+    df_a = data[data[scanner_col] == sc_a].set_index(subject_col)
+    df_b = data[data[scanner_col] == sc_b].set_index(subject_col)
+    common_subjects = df_a.index.intersection(df_b.index)
+
+    if len(common_subjects) == 0:
+        print(f"[plotting] plot_normalized_scanner_agreement: no matched subjects — skipping.")
+        return
+
+    df_a = df_a.loc[common_subjects]
+    df_b = df_b.loc[common_subjects]
+
+    # Build long arrays: normalize each ROI by its cross-subject mean per scanner
+    x_vals, y_vals, subj_idx = [], [], []
+    for roi in roi_cols:
+        col_a = df_a[roi]
+        col_b = df_b[roi]
+        mean_a = col_a.mean()
+        mean_b = col_b.mean()
+        if mean_a == 0 or mean_b == 0:
+            continue
+        x_vals.extend((col_a / mean_a).tolist())
+        y_vals.extend((col_b / mean_b).tolist())
+        subj_idx.extend(range(len(common_subjects)))
+
+    x_arr = np.array(x_vals)
+    y_arr = np.array(y_vals)
+    c_arr = np.array(subj_idx)
+
+    fig, ax = plt.subplots(figsize=(7, 7))
+
+    sc = ax.scatter(
+        x_arr, y_arr,
+        c=c_arr,
+        cmap="tab20" if len(common_subjects) <= 20 else "viridis",
+        alpha=0.55,
+        s=22,
+        linewidths=0,
+    )
+
+    # Identity line
+    lim_lo = max(0, min(x_arr.min(), y_arr.min()) - 0.05)
+    lim_hi = max(x_arr.max(), y_arr.max()) + 0.05
+    ax.plot([lim_lo, lim_hi], [lim_lo, lim_hi], color="crimson",
+            linewidth=1.2, linestyle="--", label="Identity (y = x)")
+
+    ax.set_xlim(lim_lo, lim_hi)
+    ax.set_ylim(lim_lo, lim_hi)
+    ax.set_xlabel(f"{sc_a}  (volume / scanner mean)", fontsize=11)
+    ax.set_ylabel(f"{sc_b}  (volume / scanner mean)", fontsize=11)
+    ax.set_title(title or f"Normalized ROI agreement: {sc_a} vs {sc_b}\n"
+                           f"({len(common_subjects)} subjects × {len(roi_cols)} ROIs, "
+                           f"colour = subject)")
+    ax.legend(fontsize=9, loc="upper left")
+
+    cb = fig.colorbar(sc, ax=ax, pad=0.02)
+    cb.set_label("Subject index", fontsize=9)
+
+    plt.tight_layout()
+    _save(fig, output_path)
+
+
+# ── Brain metric rendering ────────────────────────────────────────────────────
+
+# Harvard-Oxford subcortical atlas parcel indices (0-based, maxprob-thr25-1mm)
+# Index corresponds to label position in the atlas (background=0, labels start at 1)
+_HO_SUBCORTICAL_LABELS: dict[str, int] = {
+    "lateral_ventricle_L": 3,
+    "lateral_ventricle_R": 14,
+    "thalamus_L": 4,
+    "thalamus_R": 15,
+    "caudate_L": 5,
+    "caudate_R": 16,
+    "hippocampus_L": 9,
+    "hippocampus_R": 19,
+    "amygdala_L": 10,
+    "amygdala_R": 20,
+}
+
+
+def plot_brain_metric(
+    metric_dict: dict,
+    output_path: Path,
+    metric_name: str = "ICC",
+    vmin: float | None = None,
+    vmax: float | None = None,
+    cmap: str = "RdYlGn",
+    title: str | None = None,
+) -> None:
+    """
+    Render ROI-level metric values (ICC, CoV, etc.) onto the Harvard-Oxford
+    subcortical atlas and save as a high-DPI brain image.
+
+    Parameters
+    ----------
+    metric_dict : dict
+        Mapping from ROI name to scalar metric value (e.g. results['icc']).
+    output_path : Path
+        Where to save the PNG.
+    metric_name : str
+        Label used in the colorbar title.
+    vmin, vmax : float, optional
+        Colormap range. Defaults to data min/max.
+    cmap : str
+        Matplotlib colormap name (default 'RdYlGn').
+    title : str, optional
+        Figure title. Defaults to f'{metric_name} by ROI (Harvard-Oxford subcortical)'.
+
+    Notes
+    -----
+    ROIs not present in the Harvard-Oxford subcortical atlas (e.g. entorhinal
+    cortex) are silently skipped and left uncoloured (NaN / transparent).
+    Requires nilearn and nibabel.
+    """
+    try:
+        import nibabel as nib
+        from nilearn import datasets, plotting
+    except ImportError as exc:
+        raise ImportError(
+            "nilearn is required for brain rendering. "
+            "Install with: pip install nilearn"
+        ) from exc
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Load atlas
+    atlas_obj = datasets.fetch_atlas_harvard_oxford(
+        "sub-maxprob-thr25-1mm", symmetric_split=False
+    )
+    maps = atlas_obj["maps"]
+    # nilearn may return a NIfTI image directly or a file path depending on version
+    if isinstance(maps, str):
+        atlas_img = nib.load(maps)
+    else:
+        atlas_img = maps  # already a Nifti1Image
+    atlas_data = np.asarray(atlas_img.dataobj)
+
+    # Build float metric volume (NaN for background / unmapped parcels)
+    metric_vol = np.full(atlas_data.shape, np.nan, dtype=np.float32)
+
+    mapped_count = 0
+    for roi_name, value in metric_dict.items():
+        parcel_idx = _HO_SUBCORTICAL_LABELS.get(roi_name)
+        if parcel_idx is None:
+            continue
+        mask = atlas_data == parcel_idx
+        if mask.any():
+            metric_vol[mask] = float(value)
+            mapped_count += 1
+
+    if mapped_count == 0:
+        print(f"[plotting] plot_brain_metric: no ROIs mapped to atlas — skipping.")
+        return
+
+    metric_img = nib.Nifti1Image(metric_vol, atlas_img.affine, atlas_img.header)
+
+    # Colormap range
+    valid_vals = [v for k, v in metric_dict.items() if k in _HO_SUBCORTICAL_LABELS]
+    _vmin = vmin if vmin is not None else float(np.nanmin(valid_vals))
+    _vmax = vmax if vmax is not None else float(np.nanmax(valid_vals))
+    _title = title or f"{metric_name} by ROI (Harvard-Oxford subcortical)"
+
+    # Z-slices that pass through subcortical structures (MNI mm)
+    cut_coords = (-20, -10, 0, 10, 20)
+
+    display = plotting.plot_stat_map(
+        metric_img,
+        display_mode="z",
+        cut_coords=cut_coords,
+        cmap=cmap,
+        vmin=_vmin,
+        vmax=_vmax,
+        colorbar=True,
+        annotate=True,
+        draw_cross=False,
+        title=_title,
+    )
+    display.savefig(str(output_path), dpi=150)
+    display.close()
+    print(f"[plotting] Brain metric map saved: {output_path.name} ({mapped_count} ROIs mapped)")
+
+
+>>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _save(fig: plt.Figure, path: Path) -> None:
