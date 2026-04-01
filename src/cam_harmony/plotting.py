@@ -140,11 +140,7 @@ def plot_variance_decomposition(
     top_n : int
         Show only the top N ROIs by technical (non-residual) variance.
     """
-<<<<<<< HEAD
-    technical_cols = [c for c in vd_df.columns if c != "residual"]
-=======
     technical_cols = [c for c in vd_df.columns if not c.startswith("residual")]
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
     technical_total = vd_df[technical_cols].sum(axis=1)
     top_rois = technical_total.nlargest(top_n).index
     df_plot = vd_df.loc[top_rois]
@@ -481,11 +477,8 @@ def plot_icc_pre_post(
     threshold: float = 0.75,
     top_n: int = 20,
     title: str = "ICC before and after NeuroCombat harmonisation",
-<<<<<<< HEAD
-=======
     label_pre: str = "Pre-harmonisation",
     label_post: str = "Post-harmonisation",
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 ) -> None:
     """
     Side-by-side bar chart comparing per-ROI ICC before and after harmonisation.
@@ -522,15 +515,9 @@ def plot_icc_pre_post(
     width = 0.38
 
     fig, ax = plt.subplots(figsize=(12, 6))
-<<<<<<< HEAD
-    ax.bar(x - width / 2, df_plot["Pre"],  width, label="Pre-harmonisation",
-           color="steelblue",  alpha=0.85)
-    ax.bar(x + width / 2, df_plot["Post"], width, label="Post-harmonisation",
-=======
     ax.bar(x - width / 2, df_plot["Pre"],  width, label=label_pre,
            color="steelblue",  alpha=0.85)
     ax.bar(x + width / 2, df_plot["Post"], width, label=label_post,
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
            color="darkorange", alpha=0.85)
     ax.axhline(threshold, color="crimson", linestyle="--", linewidth=1.2,
                label=f"Threshold ({threshold})")
@@ -709,8 +696,6 @@ def generate_all_figures(
     return saved
 
 
-<<<<<<< HEAD
-=======
 # ── Normalized scanner agreement scatter ─────────────────────────────────────
 
 def plot_normalized_scanner_agreement(
@@ -926,7 +911,6 @@ def plot_brain_metric(
     print(f"[plotting] Brain metric map saved: {output_path.name} ({mapped_count} ROIs mapped)")
 
 
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _save(fig: plt.Figure, path: Path) -> None:

@@ -332,11 +332,7 @@ def decompose_variance(
     for roi in roi_cols:
         total_var = data[roi].var()
         if total_var == 0:
-<<<<<<< HEAD
-            results.append({s: 0.0 for s in sources} | {"residual": 0.0, "roi": roi})
-=======
             results.append({s: 0.0 for s in sources} | {"residual (biological+noise)": 0.0, "roi": roi})
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
             continue
 
         explained = {}
@@ -344,24 +340,15 @@ def decompose_variance(
 
         for source in sources:
             group_means = data.groupby(source)[roi].transform("mean")
-<<<<<<< HEAD
-            ss_source = ((group_means - data[roi].mean()) ** 2).sum()
-            explained[source] = ss_source / (total_var * len(data)) * 100
-=======
             current_mean = residual_data.mean()
             ss_source = ((group_means - current_mean) ** 2).sum()
             explained[source] = ss_source / (total_var * len(data)) * 100
             residual_data = residual_data - (group_means - current_mean)
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
         total_explained = sum(explained.values())
         residual_pct = max(0.0, 100.0 - total_explained)
 
-<<<<<<< HEAD
-        results.append({**explained, "residual": residual_pct, "roi": roi})
-=======
         results.append({**explained, "residual (biological+noise)": residual_pct, "roi": roi})
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 
     df = pd.DataFrame(results).set_index("roi")
     return df
@@ -459,8 +446,6 @@ def run_variance_analysis(
     return results
 
 
-<<<<<<< HEAD
-=======
 def compute_variance_components(
     data: pd.DataFrame,
     roi_cols: list[str],
@@ -544,7 +529,6 @@ def detect_design(
     }
 
 
->>>>>>> 3d53bb9 (Update with visuals and multiscanner)
 if __name__ == "__main__":
     import argparse
 
